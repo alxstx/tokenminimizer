@@ -6,6 +6,13 @@ It keeps a tiny always-loaded brief plus a live memory index in context and push
 
 **Core rule: index in context, detail on disk.** Only `AGENTS.md` and `memory/MEMORY.md` load by default (a few hundred tokens). Everything else is pulled in just-in-time.
 
+## How it works
+```
+always loaded, every session ─────▶  AGENTS.md  +  memory/MEMORY.md           (~1–2K tokens)
+loaded only when the task needs ──▶  memory/{architecture,decisions,tasks}.md · source files
+invoked on demand (not always-on) ▶  /bootstrap-fill /bootstrap-verify /plan /implement /verify-change
+```
+
 ## Quickstart
 1. Copy `AGENTS.md`, `memory/`, `harness/`, and `.github/` into your repo.
 2. Run `/bootstrap-fill` (Copilot) or paste `harness/prompts/1-bootstrap-fill.md` — an agent fills `AGENTS.md` and seeds `memory/` from your repo.
@@ -24,10 +31,15 @@ It keeps a tiny always-loaded brief plus a live memory index in context and push
 | `.github/copilot-instructions.md` | always (Copilot) | Forces "read memory first" behavior. |
 | `harness/` | reference | Canonical prompts, templates, and full docs ([`harness/README.md`](harness/README.md)). |
 
+## Principles
+- **Progressive disclosure** — an index in context, detail on disk; on-demand files cost nothing until opened.
+- **Externalized memory** — durable facts live in `memory/` and are read back later, not held in a context window that resets each session.
+- **Invocation over always-on** — the "agents" are prompts you fire, not definitions loaded on every message.
+
+Full design notes, token math, customization, and FAQ: [`harness/README.md`](harness/README.md).
+
 ## Why so few agents
 Existing agent frameworks tend to add agents — and tokens; some ship hundreds of thousands of tokens of always-on agent definitions, and multi-agent setups routinely burn 4–15× the tokens. This harness does the opposite: **prompts you invoke** instead of always-on agents, and only three roles that pay for themselves — **onboard, plan, verify** — plus the main loop. The token win is *progressive disclosure* + *invocation isolation*, not more agents.
-
-See [`harness/README.md`](harness/README.md) for the full design, token-hygiene rules, and per-tool wiring (Copilot, Cursor, Claude Code, any tool).
 
 ---
 A starting point — fork it, tune the prompts, make it yours.
